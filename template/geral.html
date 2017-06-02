@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Garoa Hackerspace Status</title>
+        
+        <script type="text/javascript" src="../static/js/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="../static/js/funcao.js"></script>
+
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="viewport" content="user-scalable=no, width=480" />
+    
+    <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/img/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/img/apple-touch-icon-114x114.png">
+    <link rel="shortcut icon" sizes="114x114" href="/static/img/apple-touch-icon-114x114.png">
+
+	<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+	<script>
+		// Initialize Firebase
+		var config = {
+			apiKey: "AIzaSyBzAaba8Vu8I8Qv77RgnMMVnitfPxfr-oY",
+			authDomain: "garoahc.firebaseapp.com",
+			databaseURL: "https://garoahc.firebaseio.com",
+			storageBucket: "garoahc.appspot.com",
+		};
+		firebase.initializeApp(config);
+
+
+		firebase.database().ref('/').on('value', function(snapshot) {
+			//console.log(snapshot.val());
+			getStatus();
+		});		
+
+	</script>
+	    
+
+	<!-- device-width -->
+	
+	<script type="text/javascript">
+		
+		var TEMPO = 5 * 60 * 1000;
+		
+		function setStatus(open) {
+			$("#status").removeClass().addClass(open ? "open" : "closed");
+			var status = open ? "aberto" : "fechado";
+			var texto = "está " + status + " neste momento."
+			$("h2").text(texto);
+			
+			getMacs();
+		}
+		
+		function getStatus() {
+			$.getJSON("/status", function(data){
+				setStatus(data.open);
+				//setTimeout(getStatus, TEMPO);
+				
+				for (var i=0; i<data.events.length; i++) {
+					var item = data.events[i];
+					if (item.type == "check-in") {
+						if ($("#event_" + item.t).length == 0) {
+							var data_hora = format_date_timestamp(item.t);
+							var layer = $("<li></li>");
+							layer.hide();
+							layer.attr("id", "event_" + item.t);
+							layer.text(data_hora + ": " + item.name);
+							
+							$("#log").prepend(layer);
+							layer.slideDown();
+						}
+					}
+				}	
+			});
+		}
+		
+		function getMacs() {
+			$.getJSON("/macs", function(data){
+				$("#names").empty();
+				window.data = data;
+				console.log(data);
+				for (name in data.known) {
+					var data_hora = format_date_timestamp(data.known[name]);
+					var layer = $("<li></li>");
+					layer.text(name);
+					layer.attr("title", data_hora);
+					
+					$("#names").append(layer);
+				}
+				$("#names li").not(":last").append(", ");
+				
+				if (data.unknown > 0) {
+					var unknown = $("<li></li>");
+					unknown.text(data.unknown + " desconhecido" + (data.unknown == 1 ? "" : "s"));
+					$("#names").append(unknown);
+					
+					if ($("#names li").length > 1) {
+					  $("#names li:last").prepend(" e ");
+					}
+				}
+					$("#names li:last").append(".");
+			});
+		}
+		
+		$(document).ready(function(){
+			window.moveTo(0, 0);
+			//getStatus();
+			setInterval(getMacs,TEMPO); 
+		});
+		
+		
+	</script>
+	
+	<style type="text/css">
+		body {
+			font-family: Helvetica, Verdana;
+			font-size: 10pt;
+			margin: 0;
+			padding: 10px;
+		}
+		
+		h1 {
+			position: absolute;
+			left: 100px;
+			top: 5px;
+			font-size: 16pt;
+		}
+
+		h2 {
+			position: absolute;
+			left: 100px;
+			top: 35px;
+			font-size: 12pt;
+		}
+
+		#status {
+			/*width: 80px;*/
+			height: 80px;
+			position: relative;
+		}
+		
+		#status img {
+			display: none;
+			width: 80px;
+			height: 80px;
+		}
+		
+		#status.open .open {
+			display: block !important;
+		}
+		#status.closed .closed {
+			display: block !important;
+		}
+		
+		#log {
+			list-style-type: none;
+			margin: 0px 0 0 0;
+			padding: 0;
+		}
+		#log li {
+			padding: 3px 7px;
+			margin: 0;
+		}
+		
+		#names li {
+		  display: inline;
+		}
+		
+	</style>
+	
+</head>
+<body onorientationchange="updateOrientation();" ontouchmove="BlockMove(event);" >
+<div id="content">	
+	<div id="status">
+		<img class="open" src="../static/img/Garoa_aberto.png" alt="Garoa Aberto" />
+		<img class="closed" src="../static/img/Garoa_fechado.png" alt="Garoa Fechado" />
+		<h1>Garoa Hacker Clube</h1>
+		<h2>aberto ou fechado?</h2>
+	</div>
+
+	<ul id="names">
+		
+	</ul>
+	
+	<div id="fsqr">
+		<img class="fsqr" src="../static/img/4sqr.png" alt="4srq">
+	</div>	
+	<ul id="log">
+		
+	</ul>
+
+</div>
+</body>
+</html>
