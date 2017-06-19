@@ -28,7 +28,6 @@ JSON_STATUS = {
 		"twitter": "garoahc",
 		"foursquare": FOURSQUARE_VENUE_ID,
 		"ml":"cs@garoa.net.br",
-		#"keymaster": "+551112345678 (nome)",
 	},
 	"status": "open for public",
 	"logo":"https://garoahc.appspot.com/static/img/logo.png",
@@ -48,9 +47,5 @@ MAC_SPREADSHEET_STR = os.environ['MAC_SPREADSHEET_STR']
 JSON_MACS = {
 	"unknown":0,
 	"known":{},
-	#"known":{
-	  #"Lechuga": 123456789,
-	  #"name": timestamp
-	#},
 	"lastchange": 1298244863
 }
